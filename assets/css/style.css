@@ -1,0 +1,130 @@
+body {
+  margin: 0;
+}
+.hero {
+  background: linear-gradient(135deg, #8474d2 20%, #14007b 90%);
+  height: 100vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+nav {
+  padding: 7px;
+  display: flex;
+  align-items: center;
+}
+.website_icon img {
+  width: 35px;
+  height: 35px;
+}
+.index-pic {
+  width: 100%;
+
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+  /* make the image a liitle transparent */
+  opacity: 0.7;
+}
+button {
+  background-color: #14007b;
+}
+.website_icon {
+  background-color: white;
+  border-radius: 50%;
+  padding: 5px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.lms {
+  border-right: #6f60b8 2px solid;
+  margin: 0px 6px;
+  padding-right: 5px;
+}
+.hero_left {
+  color: white;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px;
+}
+.hero_right {
+  width: 40%;
+}
+.hero_right form {
+  background-color: white;
+  width: 350px;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+.hero_right form img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  margin: 0 auto;
+  padding-bottom: 20px;
+}
+/* .hero_right form input{
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #14007B;
+    border-radius: 5px;
+    font-size: 16px;
+    } */
+.hero_right form button {
+  background-color: #14007b;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.input-container {
+  position: relative;
+  margin: 20px 0;
+  width: 94%;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.input-container label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  background: white;
+  padding: 0 5px;
+}
+
+.input-container input:focus + label,
+.input-container input:not(:placeholder-shown) + label {
+  top: -10px;
+  left: 5px;
+  font-size: 12px;
+  color: #14007b;
+}
+.btn {
+  background-color: #14007b;
+  color: white;
+}
+:root {
+  --bs-primary: #8a2be2;
+  --bs-warning: #14007b;
+}
