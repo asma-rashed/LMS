@@ -42,19 +42,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle new file upload
     if (!empty($_FILES['file']['name'])) {
-        $target_dir = "uploads/assignments/";
-        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+    if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        die("<script>alert('Upload failed.'); history.back();</script>");
+    }
 
-        $target_file = $target_dir . time() . "_" . basename($_FILES["file"]["name"]);
-        move_uploaded_file($_FILES["file"]["tmp_name"], $target_file);
+    $allowed = ['pdf', 'doc', 'docx', 'zip', 'png', 'jpg'];
+    $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
 
-        // Delete old file if exists
+    if (!in_array($ext, $allowed) || $_FILES['file']['size'] > 5 * 1024 * 1024) {
+        die("<script>alert('File type or size not allowed.'); history.back();</script>");
+    }
+
+    $target_dir = "uploads/assignments/";
+    if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+
+    $target_file = $target_dir . bin2hex(random_bytes(8)) . "." . $ext;   // random name, no user filename
+
+    if (move_uploaded_file($_FILES['file']['tmp_name'], $target_file)) {
         if (!empty($file_path) && file_exists($file_path)) {
-            unlink($file_path);
+            unlink($file_path);          // remove the old file only after the new one is saved
         }
-
         $file_path = $target_file;
     }
+}
 
     $update_stmt = $con->prepare("UPDATE assignments SET title = ?, description = ?, due_date = ?, file_path = ? WHERE id = ?");
     $update_stmt->bind_param("ssssi", $title, $description, $due_date, $file_path, $assignment_id);

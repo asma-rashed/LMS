@@ -66,11 +66,13 @@ if (!$course_id) {
 
 
 
+
+$course_id = intval($course_id);
 $instructor_email = $row['email'];
 
-$sql = "SELECT * FROM courses WHERE created_by = ?";
+$sql = "SELECT * FROM courses WHERE course_id = ? AND created_by = ?";
 $stmt = mysqli_prepare($con, $sql);
-mysqli_stmt_bind_param($stmt, "s", $instructor_email);
+mysqli_stmt_bind_param($stmt, "is", $course_id, $instructor_email);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
@@ -85,7 +87,6 @@ if (mysqli_num_rows($result) === 0) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addexam'])) {
     $title = trim($_POST['title']);
     $questions = trim($_POST['questions']);
-    $course_id = intval($_POST['course_id']);
     $created_by = $row['email'];
     $start = $_POST['start_datetime'];
     $end = $_POST['end_datetime'];
@@ -98,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addexam'])) {
         echo "<script>alert('Exam added successfuly!'); window.location.href='exams.php';</script>";
         exit();
     } else {
-        echo "MySQL ERROR: " . $stmt->error;
+        echo "Could not save the exam. Please try again.";
         exit();
     }
 
@@ -178,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addexam'])) {
                         </h2>
 
                         <form method="POST" action="addExam.php" id="examForm" class="needs-validation" novalidate>
-                            <input type="hidden" name="course_id" value="<?= $_GET['course_id'] ?>">
+                            <input type="hidden" name="course_id" value="<?= $course_id ?>">
 
                             <!-- Exam Title -->
                             <div class="mb-4">

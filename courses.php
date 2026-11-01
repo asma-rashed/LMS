@@ -40,8 +40,8 @@ if (isset($_SESSION['username'])) {
     header("Location: index.php");
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe'])) {
-    $course_id = $_POST['course_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe']) && $user_type === 'users') {
+    $course_id = intval($_POST['course_id']);
 
     $check_query = "SELECT * FROM enrollments WHERE student_id = ? AND course_id = ?";
     $stmt = mysqli_prepare($con, $check_query);
@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe'])) {
         }
     }
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unsubscribe'])) {
-    $course_id = $_POST['course_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unsubscribe']) && $user_type === 'users') {
+    $course_id = intval($_POST['course_id']);
 
     $delete_query = "DELETE FROM enrollments WHERE student_id = ? AND course_id = ?";
     $stmt = mysqli_prepare($con, $delete_query);

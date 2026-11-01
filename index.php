@@ -53,38 +53,21 @@ if (isset($_POST['login'])) {
             if ($found_table === $default_table) {
                 // Try login
                 if (password_verify($password, $row['password'])) {
+                    session_regenerate_id(true);
                     $_SESSION['username'] = $row['username'];
                     $_SESSION['user_type'] = $found_table;
                     header("Location: profile.php");
                     exit();
                 } else {
-                    $error = "Incorrect password.";
+                    $error = "Incorrect username, password or user type.";
                 }
             } else {
-                // Username exists in the other table
-                $error = "This username is already taken.";
+                
+                $error = "Incorrect username, password or user type.";
             }
-        } 
-        // else {
-        //     // 🔹 Step 3: Register new user
-        //     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        //     $insert_sql = "INSERT INTO $default_table (username, password) VALUES (?, ?)";
-        //     $insert_stmt = mysqli_prepare($con, $insert_sql);
-        //     mysqli_stmt_bind_param($insert_stmt, "ss", $username, $hashed_password);
-        //     $exec_insert = mysqli_stmt_execute($insert_stmt);
-
-        //     if (!$exec_insert) {
-        //         $error = "Error while creating account. Please try again.";
-        //     } else {
-        //         $_SESSION['username'] = $username;
-        //         $_SESSION['user_type'] = $default_table;
-        //         mysqli_stmt_close($insert_stmt);
-        //         header("Location: profile.php");
-        //         exit();
-        //     }
-        // } 
+        }
         else {
-            $error = "Username does not exist. Please check your username.";
+            $error = "Incorrect username, password or user type.";
         }
     }
 }
@@ -174,7 +157,6 @@ if (isset($_POST['login'])) {
     </div>
     <script src="assets/js/validation.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 </body>
 
 </html>

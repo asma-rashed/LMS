@@ -41,28 +41,48 @@ if ($user_type !== 'users' && $user_type !== 'instructors') {
     header("Location: index.php");
     exit();
 }
-if ($user_type === 'instructors') {
-    $current_time = date('Y-m-d H:i:s');
 
-    if (!empty($exam['end_datetime']) && $current_time > $exam['end_datetime']) {
-        header("Location: exams.php");
-        exit;
-    }
-}
 $exam_id = intval($_GET['exam_id']);
 
 $result = $con->query("SELECT * FROM exams WHERE exam_id = $exam_id");
 $exam = $result->fetch_assoc();
-
+if (!$exam) {
+    header("Location: exams.php");
+    exit();
+}
+// A student can take each exam only once
+if ($user_type === 'users') {
+    $check = $con->prepare("SELECT id FROM exam_submissions WHERE exam_id = ? AND student_username = ?");
+    $check->bind_param("is", $exam_id, $_SESSION['username']);
+    $check->execute();
+    if ($check->get_result()->num_rows > 0) {
+        header("Location: examResult.php?exam_id=$exam_id");
+        exit();
+    }
+}
+// Students can only take the exam between its start and end time
+if ($user_type === 'users') {
+    $now = date('Y-m-d H:i:s');
+    if ((!empty($exam['start_datetime']) && $now < $exam['start_datetime']) ||
+        (!empty($exam['end_datetime']) && $now > $exam['end_datetime'])
+    ) {
+        echo "<script>alert('This exam is not open now.'); window.location.href='exams.php';</script>";
+        exit();
+    }
+}
 $questions = json_decode($exam['questions'], true);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
-    $exam_id = $_POST['exam_id'];
-    $student_username = $_POST['student_username'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && $user_type === 'users') {
+
+    $student_username = $_SESSION['username'];
 
     // Get original exam questions
     $res = $con->query("SELECT questions FROM exams WHERE exam_id = $exam_id");
     $exam = $res->fetch_assoc();
+    if (!$exam) {
+        header("Location: exams.php");
+        exit();
+    }
     $questions = json_decode($exam['questions'], true);
 
     $answers = [];
@@ -98,10 +118,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
     $stmt = $con->prepare("INSERT INTO exam_submissions (exam_id, student_username, answers, score) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("issi", $exam_id, $student_username, $answers_json, $percentage);
-    $stmt->execute();
-
-    header("Location: examResult.php?exam_id=$exam_id&score=$score&total=$total&percentage=$percentage");
-    exit();
+    
+    try {
+        $stmt->execute();
+    } catch (mysqli_sql_exception $e) {
+        // The student already submitted this exam: show the saved result
+        header("Location: examResult.php?exam_id=$exam_id");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -172,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
                 <?php if ($user_type == 'users'): ?>
 
-                    <form method="POST" action="takeExam.php">
+                    <form method="POST" action="takeExam.php?exam_id=<?php echo $exam_id; ?>">
                         <input type="hidden" name="exam_id" value="<?php echo $exam_id; ?>">
                         <input type="hidden" name="student_username" value="<?php echo htmlspecialchars($_SESSION['username']); ?>">
 

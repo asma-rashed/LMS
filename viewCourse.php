@@ -31,18 +31,29 @@ if (isset($_SESSION['username'])) {
             $_SESSION['user_type'] = $table;
             break;
         }
+        
     }
 
     if (!$row) {
         echo "User not found.";
         exit();
     }
+}else {
+    header("Location: index.php");
+    exit();
 }
-$course_id = $_GET['id'];
+$course_id = intval($_GET['id'] ?? 0);
 $course_sql = "SELECT * FROM courses WHERE course_id = $course_id";
 $course_result = mysqli_query($con, $course_sql);
 $course = mysqli_fetch_assoc($course_result);
-
+if (!$course) {
+    header("Location: courses.php");
+    exit();
+}
+if ($user_type === 'instructors' && $course['created_by'] !== $email) {
+    header("Location: courses.php");
+    exit();
+}
 // Count how many students enrolled
 $count_sql = "SELECT COUNT(*) AS student_count FROM enrollments WHERE course_id = $course_id";
 $count_result = mysqli_query($con, $count_sql);
@@ -55,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_course']) && $
     $description = $_POST['description'];
     $content = $_POST['content'];
 
-    $update_sql = "UPDATE courses SET course_name = ?, course_code = ?, credit_hours = ?, description = ?, content = ? WHERE course_id = ?";
+    $update_sql = "UPDATE courses SET course_name = ?, course_code = ?, credit_hours = ?, description = ?, content = ? WHERE course_id = ? AND created_by = ?";
     $stmt = mysqli_prepare($con, $update_sql);
-    mysqli_stmt_bind_param($stmt, "ssissi", $course_name, $course_code, $credit_hours, $description, $content, $course_id);
+    mysqli_stmt_bind_param($stmt, "ssissis", $course_name, $course_code, $credit_hours, $description, $content, $course_id, $email);
 
     if (mysqli_stmt_execute($stmt)) {
         echo "<script>alert('Course updated successfully.'); window.location.href='viewCourse.php?id=" . urlencode($course_id) . "';</script>";
@@ -71,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_id']) && $user
     $course_id_to_delete = $_POST['course_id'];
 
     // Delete the course
-    $delete_sql = "DELETE FROM courses WHERE course_id = ?";
+    $delete_sql = "DELETE FROM courses WHERE course_id = ? AND created_by = ?";
     $stmt = mysqli_prepare($con, $delete_sql);
-    mysqli_stmt_bind_param($stmt, "i", $course_id_to_delete);
+    mysqli_stmt_bind_param($stmt, "is", $course_id_to_delete, $email);
 
     if (mysqli_stmt_execute($stmt)) {
         echo "<script>alert('Course deleted successfully.'); window.location.href='courses.php';</script>";
@@ -246,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_id']) && $user
                             </div>
 
                             <div class="mt-4 d-flex justify-content-center">
-                                <form action="viewcourse.php?id=<?php echo urlencode($course['course_id']); ?>" method="post" onsubmit="return confirm('<?= $lang['delete_course_cofirmation'] ?>');">
+                                <form action="viewCourse.php?id=<?php echo urlencode($course['course_id']); ?>" method="post" onsubmit="return confirm('<?= $lang['delete_course_cofirmation'] ?>');">
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['course_id']); ?>">
                                     <button type="submit" class="btn btn-danger btn-lg">
                                         <?= $lang['delete_course'] ?>

@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update_stmt->bind_param("ssi", $grade, $feedback, $submission_id);
     $update_stmt->execute();
 
-    echo "<script>alert('Submission graded successfully!'); window.location.href='viewSubmissions.php?assignment_id={$submission['id']}';</script>";
+    echo "<script>alert('Submission graded successfully!'); window.location.href='viewSubmissions.php?id={$submission['id']}';</script>";
     exit();
 }
 ?>

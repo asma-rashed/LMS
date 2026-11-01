@@ -1,24 +1,41 @@
 <?php
 session_start();
 include 'config/database.php';
-if (
-    !isset($_GET['exam_id']) ||
-    !isset($_GET['score']) ||
-    !isset($_GET['total']) ||
-    !isset($_GET['percentage'])
-) {
+
+// Only logged-in students can see their own result
+if (!isset($_SESSION['username']) || ($_SESSION['user_type'] ?? '') !== 'users') {
+    header("Location: index.php");
+    exit();
+}
+if (!isset($_GET['exam_id'])) {
     header("Location: profile.php");
     exit();
 }
+
 $exam_id = intval($_GET['exam_id']);
-$score = intval($_GET['score']);
-$total = intval($_GET['total']);
-$percentage = floatval($_GET['percentage']);
+$student_username = $_SESSION['username'];
+
+// Get this student's latest submission for this exam
+$stmt = $con->prepare("SELECT score, answers FROM exam_submissions WHERE exam_id = ? AND student_username = ? ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("is", $exam_id, $student_username);
+$stmt->execute();
+$submission = $stmt->get_result()->fetch_assoc();
+
+if (!$submission) {
+    header("Location: exams.php");
+    exit();
+}
+
+$percentage = $submission['score'];
+$total = count(json_decode($submission['answers'], true) ?: []);
+$score = $total > 0 ? (int) round($percentage * $total / 100) : 0;
 
 // Get exam title
-$exam_result = $con->query("SELECT title FROM exams WHERE exam_id = $exam_id");
-$exam = $exam_result->fetch_assoc();
-$exam_title = htmlspecialchars($exam['title']);
+$stmt = $con->prepare("SELECT title FROM exams WHERE exam_id = ?");
+$stmt->bind_param("i", $exam_id);
+$stmt->execute();
+$exam = $stmt->get_result()->fetch_assoc();
+$exam_title = htmlspecialchars($exam['title'] ?? '');
 ?>
 
 <!DOCTYPE html>

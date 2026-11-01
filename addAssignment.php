@@ -26,11 +26,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $file_path = null;
     if (!empty($_FILES['file']['name'])) {
+        if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            die("<script>alert('Upload failed.'); history.back();</script>");
+        }
+
+        $allowed = ['pdf', 'doc', 'docx', 'zip', 'png', 'jpg'];
+        $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($ext, $allowed) || $_FILES['file']['size'] > 5 * 1024 * 1024) {
+            die("<script>alert('File type or size not allowed.'); history.back();</script>");
+        }
+
         $target_dir = "uploads/assignments/";
-        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
-        $target_file = $target_dir . time() . "_" . basename($_FILES["file"]["name"]);
-        move_uploaded_file($_FILES["file"]["tmp_name"], $target_file);
-        $file_path = $target_file;
+        if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+
+        $target_file = $target_dir . bin2hex(random_bytes(8)) . "." . $ext;   // random name, no user filename
+
+        if (move_uploaded_file($_FILES['file']['tmp_name'], $target_file)) {
+            $file_path = $target_file;
+        }
     }
 
     $stmt = $con->prepare("INSERT INTO assignments (course_id, title, description, file_path, created_by, due_date) VALUES (?, ?, ?, ?, ?, ?)");
@@ -122,8 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label"><?= $lang['add_assignment_label_attach_file'] ?></label>
                     <input type="file" name="file" class="form-control">
                 </div>
-                
-                 <div class="mb-3">
+
+                <div class="mb-3">
                     <label class="form-label"><?= $lang['add_assignment_label_due_date'] ?></label>
                     <input type="date" name="due_date" class="form-control" required>
                 </div>

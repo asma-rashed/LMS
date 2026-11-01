@@ -47,7 +47,7 @@ if (isset($_POST['delete_assignment'])) {
     $assignment_id = intval($_POST['assignment_id']);
 
     $stmt = mysqli_prepare($con, "SELECT * FROM assignments WHERE id = ? AND created_by = ?");
-    mysqli_stmt_bind_param($stmt, "is", $assignment_id, $email);
+    mysqli_stmt_bind_param($stmt, "is", $assignment_id, $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
