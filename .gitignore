@@ -1,8 +1,6 @@
-@"
 uploads/*
 !uploads/.htaccess
 .vscode/
 .idea/
 .DS_Store
-Thumbs.db
-"@ | Out-File -Encoding ascii .gitignore
+Thumbs.db   
