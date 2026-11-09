@@ -75,6 +75,7 @@ CREATE TABLE `courses` (
   `credit_hours` int(11) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `content` text DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
   `student_count` int(11) DEFAULT NULL,
   `created_by` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

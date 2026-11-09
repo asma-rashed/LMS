@@ -31,14 +31,13 @@ if (isset($_SESSION['username'])) {
             $_SESSION['user_type'] = $table;
             break;
         }
-        
     }
 
     if (!$row) {
         echo "User not found.";
         exit();
     }
-}else {
+} else {
     header("Location: index.php");
     exit();
 }
@@ -194,8 +193,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_id']) && $user
                                 </div>
                                 <div>
                                     <h4 class="fw-bold text-secondary"><?= $lang['subject_label_file'] ?></h4>
-                                    <?php if ($course['file_path']): ?>
-                                        <p><a href="<?php echo $course['file_path']; ?>" download><?= $lang['download_courses_file'] ?></a></p>
+                                    <?php if (!empty($course['file_path'])): ?>
+                                        <p><a href="<?php echo htmlspecialchars($course['file_path']); ?>" download><?= $lang['download_courses_file'] ?></a></p>
                                     <?php endif; ?>
                                 </div>
                             </div>
